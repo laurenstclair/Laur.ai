@@ -80,12 +80,12 @@ class LaurAI:
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
 
         lemma_line = self.create_lemma_line(valid_sentence)
-
         c.fit_transform(lemma_line)
-
         print(lemma_line)
 
+        # create dataframe initialized to zeros
         valid_sentence = pandas.DataFrame(0, columns=self.bag.columns, index=self.bag.index)
+        # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
             print(i)
             valid_sentence.loc[:, i] = 1
@@ -97,9 +97,10 @@ class LaurAI:
         # valid_dataframe = pandas.DataFrame(valid_sentence, columns=c.get_feature_names(), index=self.bag.index)
 
         df = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names())  
-        print(df)
+        print(df.head())
 
         cosine = 1 - pairwise_distances(self.bag, df, metric="cosine")
+        print(cosine)
 
 laurBot = LaurAI(pandas.read_csv('data/ComedyData.csv'))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
