@@ -21,6 +21,7 @@ class LaurAI:
         self.cleaned_data = pandas.DataFrame(columns=["Question", "Answer"])
         # TODO: can just rename columns to save space
         self.finalText = pandas.DataFrame(columns=["Lemmas"])
+        self.bag = None
 
     def clean_data(self):
         # For all lines in the data dataframe
@@ -58,7 +59,7 @@ class LaurAI:
         # Creates lemmas for the cleaned data (lemma is the lower )
         lemmas = []
         for j in self.cleaned_data.iterrows():
-            print(j[1][1])
+            # print(j[1][1])
             lemmas.append(self.create_lemma_line(j[1][1]))
         self.finalText = self.finalText.append(lemmas, ignore_index=True)
 
@@ -67,6 +68,8 @@ class LaurAI:
         self.bag = pandas.DataFrame(c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=c.get_feature_names())
     
     def askQuestion(self, question):
+        c = CountVectorizer()
+
         # Removes all "stop words"
         valid_words = []
         for i in question.split():
@@ -75,13 +78,26 @@ class LaurAI:
         
         # Clean the data and get tokenized and tagged data
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
-        valid_sentence = self.create_lemma_line(valid_sentence)
-  
-        c = CountVectorizer()
-        valid_dataframe = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names())
 
-        df = pandas.DataFrame(c.fit_transform(valid_dataframe["Lemmas"]).toarray(), columns=c.get_feature_names())  
-        print(df)    
+        lemma_line = self.create_lemma_line(valid_sentence)
+
+        c.fit_transform(lemma_line)
+
+        print(lemma_line)
+
+        valid_sentence = pandas.DataFrame(0, columns=self.bag.columns, index=self.bag.index)
+        for i in lemma_line["Lemmas"].split(' '):
+            print(i)
+            valid_sentence.loc[:, i] = 1
+        print(valid_sentence.head())
+        print(valid_sentence["what"].head())
+        
+  
+        # valid_dataframe = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names(), index=self.bag.index)
+        # valid_dataframe = pandas.DataFrame(valid_sentence, columns=c.get_feature_names(), index=self.bag.index)
+
+        df = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names())  
+        print(df)
 
         cosine = 1 - pairwise_distances(self.bag, df, metric="cosine")
 
