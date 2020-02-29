@@ -1,6 +1,7 @@
-import pandas
+# import pandas
 import nltk
 import numpy
+from pandas import DataFrame, Series, read_csv
 from re import sub
 from nltk.stem import wordnet
 from sklearn.feature_extraction.text import CountVectorizer
@@ -18,9 +19,10 @@ class LaurAI:
 
     def __init__(self, data):
         self.data = data[["Answer.sentence1", "Answer.sentence9"]]
-        self.cleaned_data = pandas.DataFrame(columns=["Question", "Answer"])
+        self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # TODO: can just rename columns to save space
-        self.finalText = pandas.DataFrame(columns=["Lemmas"])
+        self.finalText = DataFrame(columns=["Lemmas"])
+        self.c = CountVectorizer()
         self.bag = None
 
     def clean_data(self):
@@ -64,12 +66,9 @@ class LaurAI:
         self.finalText = self.finalText.append(lemmas, ignore_index=True)
 
     def create_bag_of_words(self):
-        c = CountVectorizer()
-        self.bag = pandas.DataFrame(c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=c.get_feature_names())
+        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=self.c.get_feature_names())
     
     def askQuestion(self, question):
-        c = CountVectorizer()
-
         # Removes all "stop words"
         valid_words = []
         for i in question.split():
@@ -80,34 +79,37 @@ class LaurAI:
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
 
         lemma_line = self.create_lemma_line(valid_sentence)
-        c.fit_transform(lemma_line)
+        # valid_question = c.fit_transform(lemma_line).toarray()
+        # print(valid_question)
+
+        lemma_2 = self.c.transform(lemma_line)
         print(lemma_line)
+        print(lemma_2)
 
         # create dataframe initialized to zeros
-        valid_sentence = pandas.DataFrame(0, columns=self.bag.columns, index=self.bag.index)
+        valid_sentence = DataFrame(0, columns=self.bag.columns, index=[0])
         # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
-            print(i)
+            # print(i)
             valid_sentence.loc[:, i] = 1
-        print(valid_sentence.head())
-        print(valid_sentence["what"].head())
-        
-  
-        # valid_dataframe = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names(), index=self.bag.index)
-        # valid_dataframe = pandas.DataFrame(valid_sentence, columns=c.get_feature_names(), index=self.bag.index)
 
-        df = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names())  
-        print(df.head())
+        cosine = 1 - pairwise_distances(self.bag, metric="cosine")
+        sum_cos = Series(cosine.sum(), index=self.data.index)
 
-        cosine = 1 - pairwise_distances(self.bag, df, metric="cosine")
-        print(cosine)
+        for i in sum_cos.sort_values(ascending=False).head(n=10).index:
+            answer = self.data.loc[i, "Answer.sentence9"]
+            print("\n", question)
+            print(answer)
+            print(i)
+            print(self.data.loc[i, "Answer.sentence1"])
 
-laurBot = LaurAI(pandas.read_csv('data/ComedyData.csv'))
+
+laurBot = LaurAI(read_csv("data/ComedyData.csv"))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
 # need to know the type of word
 laurBot.clean_data()
-print(laurBot.cleaned_data.head())
+# print(laurBot.cleaned_data.head())
 
 # Then we lematize which means to convert the word into it's base form
 laurBot.create_lemma()
@@ -115,7 +117,8 @@ print(laurBot.finalText.head())
 
 # Now we can start to create the bag of words
 laurBot.create_bag_of_words()
-print(laurBot.bag.head())
+# print(laurBot.bag.head())
 
 # Then we can ask a question
-laurBot.askQuestion("What is your name?")
+# laurBot.askQuestion("What is a funny movie we can watch?")
+laurBot.askQuestion("Is Adam Sandler the funniest comedian of all time?")
