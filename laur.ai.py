@@ -11,6 +11,8 @@ from sklearn.metrics import pairwise_distances
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 
+from datetime import datetime
+
 class LaurAI:
     """
         Class for the LaurAI chatbot. 
@@ -93,16 +95,23 @@ class LaurAI:
             # print(i)
             valid_sentence.loc[:, i] = 1
 
+        # find cosine similarity
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
-        sum_cos = Series(cosine.sum(axis=1), index=self.data.index)
+        # prepare data to be used in series with data's index
+        cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
+        # iterate through the top 10 responses
+        for i in cosine.sort_values(ascending=False).head().index:
+            print("\n", i)
+            print(cosine.loc[i])
 
-        for i in sum_cos.sort_values(ascending=False, ignore_index=False).head(n=10).index:
-            print(sum_cos[i])
+            # print question and answer
             answer = self.data.loc[i, "response"]
-            print("\n", question)
+            print(question)
             print(answer)
-            print(i)
             print("I AM ANSWERING: ", self.data.loc[i, "comment"])
+
+start = datetime.now()
+
 
 laurBot = LaurAI(read_csv("data/transcipt.csv"))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
@@ -121,4 +130,8 @@ laurBot.create_bag_of_words()
 
 # Then we can ask a question
 # laurBot.askQuestion("What is a funny movie we can watch?")
-laurBot.askQuestion("Do you have any pets?")
+laurBot.askQuestion("Do you have a pet?")
+
+stop = datetime.now()
+
+print(stop-start)
