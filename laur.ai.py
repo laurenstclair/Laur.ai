@@ -1,6 +1,7 @@
-import pandas
+# import pandas
 import nltk
 import numpy
+from pandas import DataFrame, Series, read_csv
 from re import sub
 from nltk.stem import wordnet
 from sklearn.feature_extraction.text import CountVectorizer
@@ -10,6 +11,8 @@ from sklearn.metrics import pairwise_distances
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 
+from datetime import datetime
+
 class LaurAI:
     """
         Class for the LaurAI chatbot. 
@@ -17,10 +20,12 @@ class LaurAI:
 
 
     def __init__(self, data):
-        self.data = data[["Answer.sentence1", "Answer.sentence9"]]
-        self.cleaned_data = pandas.DataFrame(columns=["Question", "Answer"])
+        self.data = data[["comment", "response"]]
+        self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # TODO: can just rename columns to save space
-        self.finalText = pandas.DataFrame(columns=["Lemmas"])
+        self.finalText = DataFrame(columns=["Lemmas"])
+        self.c = CountVectorizer()
+        self.bag = None
 
     def clean_data(self):
         # For all lines in the data dataframe
@@ -58,13 +63,12 @@ class LaurAI:
         # Creates lemmas for the cleaned data (lemma is the lower )
         lemmas = []
         for j in self.cleaned_data.iterrows():
-            print(j[1][1])
+            # print(j[1][1])
             lemmas.append(self.create_lemma_line(j[1][1]))
         self.finalText = self.finalText.append(lemmas, ignore_index=True)
 
     def create_bag_of_words(self):
-        c = CountVectorizer()
-        self.bag = pandas.DataFrame(c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=c.get_feature_names())
+        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=self.c.get_feature_names(), index=self.data.index)
     
     def askQuestion(self, question):
         # Removes all "stop words"
@@ -75,22 +79,46 @@ class LaurAI:
         
         # Clean the data and get tokenized and tagged data
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
-        valid_sentence = self.create_lemma_line(valid_sentence)
-  
-        c = CountVectorizer()
-        valid_dataframe = pandas.DataFrame(c.fit_transform(valid_sentence).toarray(), columns=c.get_feature_names())
 
-        df = pandas.DataFrame(c.fit_transform(valid_dataframe["Lemmas"]).toarray(), columns=c.get_feature_names())  
-        print(df)    
+        lemma_line = self.create_lemma_line(valid_sentence)
+        # valid_question = c.fit_transform(lemma_line).toarray()
+        # print(valid_question)
 
-        cosine = 1 - pairwise_distances(self.bag, df, metric="cosine")
+        lemma_2 = self.c.transform(lemma_line)
+        print(lemma_line)
+        print(lemma_2)
 
-laurBot = LaurAI(pandas.read_csv('data/ComedyData.csv'))
+        # create dataframe initialized to zeros
+        valid_sentence = DataFrame(0, columns=self.bag.columns, index=[0])
+        # set column of 1's for words in lemma line
+        for i in lemma_line["Lemmas"].split(' '):
+            # print(i)
+            valid_sentence.loc[:, i] = 1
+
+        # find cosine similarity
+        cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
+        # prepare data to be used in series with data's index
+        cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
+        # iterate through the top 10 responses
+        for i in cosine.sort_values(ascending=False).head().index:
+            print("\n", i)
+            print(cosine.loc[i])
+
+            # print question and answer
+            answer = self.data.loc[i, "response"]
+            print(question)
+            print(answer)
+            print("I AM ANSWERING: ", self.data.loc[i, "comment"])
+
+start = datetime.now()
+
+
+laurBot = LaurAI(read_csv("data/transcipt.csv"))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
 # need to know the type of word
 laurBot.clean_data()
-print(laurBot.cleaned_data.head())
+# print(laurBot.cleaned_data.head())
 
 # Then we lematize which means to convert the word into it's base form
 laurBot.create_lemma()
@@ -98,7 +126,12 @@ print(laurBot.finalText.head())
 
 # Now we can start to create the bag of words
 laurBot.create_bag_of_words()
-print(laurBot.bag.head())
+# print(laurBot.bag.head())
 
 # Then we can ask a question
-laurBot.askQuestion("What is your name?")
+# laurBot.askQuestion("What is a funny movie we can watch?")
+laurBot.askQuestion("Do you have a pet?")
+
+stop = datetime.now()
+
+print(stop-start)
