@@ -18,7 +18,7 @@ class LaurAI:
 
 
     def __init__(self, data):
-        self.data = data[["Answer.sentence1", "Answer.sentence9"]]
+        self.data = data[["comment", "response"]]
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # TODO: can just rename columns to save space
         self.finalText = DataFrame(columns=["Lemmas"])
@@ -66,7 +66,7 @@ class LaurAI:
         self.finalText = self.finalText.append(lemmas, ignore_index=True)
 
     def create_bag_of_words(self):
-        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=self.c.get_feature_names())
+        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=self.c.get_feature_names(), index=self.data.index)
     
     def askQuestion(self, question):
         # Removes all "stop words"
@@ -93,18 +93,18 @@ class LaurAI:
             # print(i)
             valid_sentence.loc[:, i] = 1
 
-        cosine = 1 - pairwise_distances(self.bag, metric="cosine")
-        sum_cos = Series(cosine.sum(), index=self.data.index)
+        cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
+        sum_cos = Series(cosine.sum(axis=1), index=self.data.index)
 
-        for i in sum_cos.sort_values(ascending=False).head(n=10).index:
-            answer = self.data.loc[i, "Answer.sentence9"]
+        for i in sum_cos.sort_values(ascending=False, ignore_index=False).head(n=10).index:
+            print(sum_cos[i])
+            answer = self.data.loc[i, "response"]
             print("\n", question)
             print(answer)
             print(i)
-            print(self.data.loc[i, "Answer.sentence1"])
+            print("I AM ANSWERING: ", self.data.loc[i, "comment"])
 
-
-laurBot = LaurAI(read_csv("data/ComedyData.csv"))
+laurBot = LaurAI(read_csv("data/transcipt.csv"))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
 # need to know the type of word
@@ -121,4 +121,4 @@ laurBot.create_bag_of_words()
 
 # Then we can ask a question
 # laurBot.askQuestion("What is a funny movie we can watch?")
-laurBot.askQuestion("Is Adam Sandler the funniest comedian of all time?")
+laurBot.askQuestion("Do you have any pets?")

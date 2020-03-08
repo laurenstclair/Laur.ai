@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-df = DataFrame(columns=["conversation_id", "comment_number", "comment", "response"]);
+df = DataFrame(columns=["conversation_id", "comment_number", "comment", "response"])
 with open("transcript", "r") as infile:
     num_lines = 0
     
