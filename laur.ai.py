@@ -88,50 +88,64 @@ class LaurAI:
         print(lemma_line)
         print(lemma_2)
 
-        # create dataframe initialized to zeros
+        # create dataframe of one row initialized to zeros
+        # this will represent the lemma
         valid_sentence = DataFrame(0, columns=self.bag.columns, index=[0])
         # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
-            # print(i)
+            # if we have not seen the lemma before, columns will be added
+            # this will create an exception in the cosine similarity calcualtion
+            # therefore if we see this, provide a generic response and exit
+            if (valid_sentence.loc[:, i] != 0).any():
+                print("I am miss pwesident uwu")
+                return
+            # if input in data, put i
             valid_sentence.loc[:, i] = 1
 
         # find cosine similarity
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
         # prepare data to be used in series with data's index
         cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
-        # iterate through the top 10 responses
-        for i in cosine.sort_values(ascending=False).head().index:
-            print("\n", i)
-            print(cosine.loc[i])
+        
+        # determine index of element with highest similarity
+        i = cosine.idxmax()
+        print("\n", i, ": ", cosine.loc[i])
 
-            # print question and answer
-            answer = self.data.loc[i, "response"]
-            print(question)
-            print(answer)
-            print("I AM ANSWERING: ", self.data.loc[i, "comment"])
-
-start = datetime.now()
+        # print question and answer
+        answer = self.data.loc[i, "response"]
+        print(question)
+        print(answer)
 
 
-laurBot = LaurAI(read_csv("data/transcipt.csv"))
+time1 = datetime.now()
+laurBot = LaurAI(read_csv("data/master_data.csv"))
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
 # need to know the type of word
+
+# TODO: optimize clean data
+#       Create train() or clean() function to run unfrequently, but otherwise 
+#       use cleaned data otherwise
 laurBot.clean_data()
 # print(laurBot.cleaned_data.head())
+time2 = datetime.now()
+print("Time to clean data: ", (time2 - time1))
 
 # Then we lematize which means to convert the word into it's base form
 laurBot.create_lemma()
 print(laurBot.finalText.head())
+time1 =datetime.now()
+print("Time to create lemma: ", (time1 - time2))
 
 # Now we can start to create the bag of words
 laurBot.create_bag_of_words()
 # print(laurBot.bag.head())
+time2 = datetime.now()
+print("Time to bag: ", (time2 - time1))
 
 # Then we can ask a question
 # laurBot.askQuestion("What is a funny movie we can watch?")
-laurBot.askQuestion("Do you have a pet?")
-
-stop = datetime.now()
-
-print(stop-start)
+laurBot.askQuestion("hi")
+print("Time to ask Question: ", (datetime.now() - time2))
+laurBot.askQuestion("how are you?")
+laurBot.askQuestion("you are a robot")
