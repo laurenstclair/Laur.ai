@@ -18,7 +18,6 @@ class LaurAI:
         Class for the LaurAI chatbot. 
     """
 
-
     def __init__(self, data):
         self.data = data[["comment", "response"]]
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
@@ -46,7 +45,6 @@ class LaurAI:
         # Tokenizes the words then tags the tokenized words 
         return pos_tag(word_tokenize(line), None)
             
-
     def create_lemma_line(self, input_line):
         # We create the lemmatizer object
         lemma = wordnet.WordNetLemmatizer()
@@ -84,9 +82,9 @@ class LaurAI:
         # valid_question = c.fit_transform(lemma_line).toarray()
         # print(valid_question)
 
-        lemma_2 = self.c.transform(lemma_line)
-        print(lemma_line)
-        print(lemma_2)
+        # lemma_2 = self.c.transform(lemma_line)
+        # print(lemma_line)
+        # print(lemma_2)
 
         # create dataframe of one row initialized to zeros
         # this will represent the lemma
