@@ -1,7 +1,7 @@
 # import pandas
 import nltk
 import numpy
-from pandas import DataFrame, Series, read_csv
+from pandas import DataFrame, Series, read_csv, read_pickle
 from re import sub
 from nltk.stem import wordnet
 from sklearn.feature_extraction.text import CountVectorizer
@@ -11,17 +11,18 @@ from sklearn.metrics import pairwise_distances
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 
-from datetime import datetime
-
 class LaurAI:
     """
         Class for the LaurAI chatbot. 
     """
 
-    def __init__(self, data):
+    def __init__(self, data, use_cleaned_data=True):
         self.data = data[["comment", "response"]]
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
-        # TODO: can just rename columns to save space
+        # use data if provided
+        if use_cleaned_data:
+            self.cleaned_data = read_pickle("data/master_data_cleaned.pkl")
+        
         self.finalText = DataFrame(columns=["Lemmas"])
         self.c = CountVectorizer()
         self.bag = None
@@ -61,7 +62,6 @@ class LaurAI:
         # Creates lemmas for the cleaned data (lemma is the lower )
         lemmas = []
         for j in self.cleaned_data.iterrows():
-            # print(j[1][1])
             lemmas.append(self.create_lemma_line(j[1][1]))
         self.finalText = self.finalText.append(lemmas, ignore_index=True)
 
@@ -80,11 +80,8 @@ class LaurAI:
 
         lemma_line = self.create_lemma_line(valid_sentence)
         # valid_question = c.fit_transform(lemma_line).toarray()
-        # print(valid_question)
 
         # lemma_2 = self.c.transform(lemma_line)
-        # print(lemma_line)
-        # print(lemma_2)
 
         # create dataframe of one row initialized to zeros
         # this will represent the lemma
@@ -95,8 +92,8 @@ class LaurAI:
             # this will create an exception in the cosine similarity calcualtion
             # therefore if we see this, provide a generic response and exit
             if (valid_sentence.loc[:, i] != 0).any():
-                print("I am miss pwesident uwu")
-                return
+                return "I am miss pwesident uwu"
+    
             # if input in data, put i
             valid_sentence.loc[:, i] = 1
 
@@ -106,44 +103,38 @@ class LaurAI:
         cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
         
         # determine index of element with highest similarity
+        # the answer is the response at this inde
         i = cosine.idxmax()
-        print("\n", i, ": ", cosine.loc[i])
-
-        # print question and answer
         answer = self.data.loc[i, "response"]
-        print(question)
-        print(answer)
+        return answer
 
 
-time1 = datetime.now()
-laurBot = LaurAI(read_csv("data/master_data.csv"))
+print("Please wait as Laur.AI loads")
+
+data_master = read_csv("data/master_data.csv")
+laurBot = LaurAI(data_master)
+laurBot.clean_data()
+
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
 # need to know the type of word
 
-# TODO: optimize clean data
-#       Create train() or clean() function to run unfrequently, but otherwise 
-#       use cleaned data otherwise
-laurBot.clean_data()
-# print(laurBot.cleaned_data.head())
-time2 = datetime.now()
-print("Time to clean data: ", (time2 - time1))
-
 # Then we lematize which means to convert the word into it's base form
 laurBot.create_lemma()
-print(laurBot.finalText.head())
-time1 =datetime.now()
-print("Time to create lemma: ", (time1 - time2))
 
 # Now we can start to create the bag of words
 laurBot.create_bag_of_words()
-# print(laurBot.bag.head())
-time2 = datetime.now()
-print("Time to bag: ", (time2 - time1))
+
 
 # Then we can ask a question
 # laurBot.askQuestion("What is a funny movie we can watch?")
-laurBot.askQuestion("hi")
-print("Time to ask Question: ", (datetime.now() - time2))
-laurBot.askQuestion("how are you?")
-laurBot.askQuestion("you are a robot")
+print("Ask me anything :)")
+print("Control C or Type \"Bye\" to quit")
+while(True):
+    context = input()
+    if context.lower() == "bye":
+        print("bye :))")
+        break
+    else:
+        response = laurBot.askQuestion(context)
+        print(response)
