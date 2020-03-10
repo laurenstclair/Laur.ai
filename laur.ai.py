@@ -22,6 +22,9 @@ class LaurAI:
         # use data if provided
         if use_cleaned_data:
             self.cleaned_data = read_pickle("data/master_data_cleaned.pkl")
+            if len(self.cleaned_data) != len(self.data):
+                print("New data found. Please wait as this data is processed")
+                self.clean_data()
         
         self.finalText = DataFrame(columns=["Lemmas"])
         self.c = CountVectorizer()
@@ -63,10 +66,11 @@ class LaurAI:
         lemmas = []
         for j in self.cleaned_data.iterrows():
             lemmas.append(self.create_lemma_line(j[1][1]))
-        self.finalText = self.finalText.append(lemmas, ignore_index=True)
+        self.finalText = self.finalText.append(lemmas)
 
     def create_bag_of_words(self):
-        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(), columns=self.c.get_feature_names(), index=self.data.index)
+        self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(),
+                             columns=self.c.get_feature_names(), index=self.data.index)
     
     def askQuestion(self, question):
         # Removes all "stop words"
@@ -113,7 +117,6 @@ print("Please wait as Laur.AI loads")
 
 data_master = read_csv("data/master_data.csv")
 laurBot = LaurAI(data_master)
-laurBot.clean_data()
 
 # First we need to clean the data, so it is all lower case and without special characters or numbers
 # We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
