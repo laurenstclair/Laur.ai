@@ -29,4 +29,4 @@ def tokenize_and_tag_line(line):
 
 df = read_csv("data/master_data.csv")
 cleaned_data = clean_data(df)
-cleaned_data.to_csv("data/master_data_cleaned.csv", index=False)
+cleaned_data.to_pickle("data/master_data_cleaned.pkl")
