@@ -19,10 +19,13 @@ source venv/bin/activate
 3. Install all dependencies
 ```
 pip install -r requirements.txt
+
 python
-import nltk
-nltk.download(“punkt”)
-nltk.download(“averaged_perceptron_tagger”)
+  import nltk
+  nltk.download(‘punkt’)
+  nltk.download(‘averaged_perceptron_tagger’)
+  nltk.download(‘wordnet’)
+  
 python clean_master_data.py
 ```
 4. Run the main file
