@@ -27,6 +27,10 @@ def tokenize_and_tag_line(line):
     return pos_tag(word_tokenize(line), None)
 
 
-df = read_csv("data/master_data.csv")
-cleaned_data = clean_data(df)
-cleaned_data.to_pickle("data/master_data_cleaned.pkl")
+def prep_data():
+    '''Prepare and clean data'''
+    df = read_csv("data/master_data.csv")
+    cleaned_data = clean_data(df)
+    cleaned_data.to_pickle("data/master_data_cleaned.pkl")
+
+prep_data()
