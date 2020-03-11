@@ -18,19 +18,11 @@ source venv/bin/activate
 ```
 3. Install all dependencies
 ```
-pip install -r requirements.txt
-
-python
-  import nltk
-  nltk.download(‘punkt’)
-  nltk.download(‘averaged_perceptron_tagger’)
-  nltk.download(‘wordnet’)
-  
-python clean_master_data.py
+python chatbot_py/prepare_laurAI.py
 ```
 4. Run the main file
 ```
-python laur.ai.py
+python chatbot_py/laur.ai.py
 ```
 ## Class Structure
 All files are named according to python naming conventions, all lowercase with underscores signifying new words. Our classes are organized using the following structure. Python files can be found in the folder /chatbot_py and includes the files clean_master_data.py, combine_data_to_master.py, process_transcript.py, and laur.ai.py. 
