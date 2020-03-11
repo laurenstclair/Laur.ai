@@ -36,10 +36,10 @@ with open("transcript", "r") as infile:
                 list_data = [conversation_id, comment_num, commenet, response]
                 df.loc[num_lines] = list_data
 
-print(df.head())
+print(df.head(n=20))
 print("number of rows:", len(df))
 
-df.to_csv("data/transcipt.csv",index=False)
+# df.to_csv("data/transcipt.csv",index=False)
 
 
         
