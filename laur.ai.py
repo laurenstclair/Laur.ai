@@ -81,22 +81,35 @@ class LaurAI:
         
         # Clean the data and get tokenized and tagged data
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
-
         lemma_line = self.create_lemma_line(valid_sentence)
-        # valid_question = c.fit_transform(lemma_line).toarray()
 
-        # lemma_2 = self.c.transform(lemma_line)
+        try:
+            index = self.determine_most_similar_context(lemma_line)
 
+            # respond with response to most similar context
+            answer = self.data.loc[index, "response"]
+            return answer
+        except KeyError:
+            # an unknown word was passed
+            return "I am miss pwesident uwu"
+
+    def determine_most_similar_context(self, lemma_line):
+        '''
+        @param lemma_line: a dictionary of words from the input
+        ----
+        returne index of datapoint with most similar context to one given
+        '''
         # create dataframe of one row initialized to zeros
         # this will represent the lemma
         valid_sentence = DataFrame(0, columns=self.bag.columns, index=[0])
+
         # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
-            # if we have not seen the lemma before, columns will be added
-            # this will create an exception in the cosine similarity calcualtion
-            # therefore if we see this, provide a generic response and exit
             if (valid_sentence.loc[:, i] != 0).any():
-                return "I am miss pwesident uwu"
+                # if we have not seen the lemma before, columns will be added
+                # this will create an exception in the cosine similarity calcualtion
+                # therefore if we see this, provide a generic response and exit
+                raise KeyError("Unknown word passed in as data")
     
             # if input in data, put i
             valid_sentence.loc[:, i] = 1
@@ -108,10 +121,7 @@ class LaurAI:
         
         # determine index of element with highest similarity
         # the answer is the response at this inde
-        i = cosine.idxmax()
-        answer = self.data.loc[i, "response"]
-        return answer
-
+        return cosine.idxmax()
 
 print("Please wait as Laur.AI loads")
 
@@ -134,7 +144,7 @@ laurBot.create_bag_of_words()
 print("Ask me anything :)")
 print("Control C or Type \"Bye\" to quit")
 while(True):
-    context = input()
+    context = input("> ")
     if context.lower() == "bye":
         print("bye :))")
         break
