@@ -21,7 +21,7 @@ class LaurAI:
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # use data if provided
         if use_cleaned_data:
-            self.cleaned_data = read_pickle("../data/master_data_cleaned.pkl")
+            self.cleaned_data = read_pickle("../data/chatterbot_lib_cleaned.pkl")
             if len(self.cleaned_data) != len(self.data):
                 print("New data found. Please wait as this data is processed")
                 self.clean_data()
@@ -75,7 +75,7 @@ class LaurAI:
     def askQuestion(self, question):
         # Removes all "stop words"
         valid_words = []
-        for i in question.split():
+        for i in self.clean_line(question):
             if i not in stopwords.words("english"):
                 valid_words.append(i)
 
@@ -125,7 +125,7 @@ class LaurAI:
 
 print("Please wait as Laur.AI loads")
 
-data_master = read_csv("../data/master_data.csv")
+data_master = read_csv("../data/chatterbot_lib.csv")
 laurBot = LaurAI(data_master)
 
 # First we need to clean the data, so it is all lower case and without special characters or numbers
