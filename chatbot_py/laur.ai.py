@@ -13,7 +13,7 @@ from nltk.corpus import stopwords
 
 class LaurAI:
     """
-        Class for the LaurAI chatbot. 
+        Class for the LaurAI chatbot.
     """
 
     def __init__(self, data, use_cleaned_data=True):
@@ -21,11 +21,11 @@ class LaurAI:
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # use data if provided
         if use_cleaned_data:
-            self.cleaned_data = read_pickle("data/master_data_cleaned.pkl")
+            self.cleaned_data = read_pickle("../data/master_data_cleaned.pkl")
             if len(self.cleaned_data) != len(self.data):
                 print("New data found. Please wait as this data is processed")
                 self.clean_data()
-        
+
         self.finalText = DataFrame(columns=["Lemmas"])
         self.c = CountVectorizer()
         self.bag = None
@@ -33,26 +33,26 @@ class LaurAI:
     def clean_data(self):
         # For all lines in the data dataframe
         for j in self.data.iterrows():
-            # Appends the cleaned question and response to the cleaned_data array 
+            # Appends the cleaned question and response to the cleaned_data array
             self.cleaned_data = self.cleaned_data.append(
                 {
-                    "Question":self.tokenize_and_tag_line(self.clean_line(j[1][0])), 
+                    "Question":self.tokenize_and_tag_line(self.clean_line(j[1][0])),
                     "Answer":self.tokenize_and_tag_line(self.clean_line(j[1][1]))
-                }, 
+                },
                 ignore_index=True)
-        
+
     def clean_line(self, line):
-        # This line makes all lowercase, and removes anything that isn't a number 
+        # This line makes all lowercase, and removes anything that isn't a number
         return sub(r'[^a-z ]', '', str(line).lower())
 
     def tokenize_and_tag_line(self, line):
-        # Tokenizes the words then tags the tokenized words 
+        # Tokenizes the words then tags the tokenized words
         return pos_tag(word_tokenize(line), None)
-            
+
     def create_lemma_line(self, input_line):
         # We create the lemmatizer object
         lemma = wordnet.WordNetLemmatizer()
-        # This is an array for the current line that we will append values to 
+        # This is an array for the current line that we will append values to
         line = []
         for token, ttype in input_line:
             checks = ["a", "v", "r", "n"]
@@ -71,14 +71,14 @@ class LaurAI:
     def create_bag_of_words(self):
         self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(),
                              columns=self.c.get_feature_names(), index=self.data.index)
-    
+
     def askQuestion(self, question):
         # Removes all "stop words"
         valid_words = []
         for i in question.split():
             if i not in stopwords.words("english"):
                 valid_words.append(i)
-        
+
         # Clean the data and get tokenized and tagged data
         valid_sentence = self.tokenize_and_tag_line(self.clean_line(" ".join(valid_words)))
         lemma_line = self.create_lemma_line(valid_sentence)
@@ -110,7 +110,7 @@ class LaurAI:
                 # this will create an exception in the cosine similarity calcualtion
                 # therefore if we see this, provide a generic response and exit
                 raise KeyError("Unknown word passed in as data")
-    
+
             # if input in data, put i
             valid_sentence.loc[:, i] = 1
 
@@ -118,18 +118,18 @@ class LaurAI:
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
         # prepare data to be used in series with data's index
         cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
-        
+
         # determine index of element with highest similarity
         # the answer is the response at this inde
         return cosine.idxmax()
 
 print("Please wait as Laur.AI loads")
 
-data_master = read_csv("data/master_data.csv")
+data_master = read_csv("../data/master_data.csv")
 laurBot = LaurAI(data_master)
 
 # First we need to clean the data, so it is all lower case and without special characters or numbers
-# We can then tokenize the data, which means splitting it up into words instead of a phrase. We also 
+# We can then tokenize the data, which means splitting it up into words instead of a phrase. We also
 # need to know the type of word
 
 # Then we lematize which means to convert the word into it's base form
