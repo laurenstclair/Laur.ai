@@ -75,7 +75,7 @@ class LaurAI:
     def askQuestion(self, question):
         # Removes all "stop words"
         valid_words = []
-        for i in self.clean_line(question):
+        for i in question.split():
             if i not in stopwords.words("english"):
                 valid_words.append(i)
 
