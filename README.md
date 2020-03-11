@@ -24,3 +24,5 @@ pip install -r requirements.txt
 ```
 python laur.ai.py
 ```
+## Class Structure
+All files are named according to python naming conventions. 
