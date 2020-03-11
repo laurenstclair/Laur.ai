@@ -29,7 +29,7 @@ All files are named according to python naming conventions, all lower case with 
 
 ## laur.ai.py
 laur.ai.py is built using the nltk library. The data is run throw a series of steps in order to create a bag of words associated by comment and response after undergoing lemmatization, 
-  1. Text data is cleaned by removal of numbers and conversion to lowercase
-  2. Tokenize and tage: words are split up from phrases to then be categorized based on type
+  1. Text data is cleaned by removal of numbers and conversion to lowercase. 
+  2. Tokenize and tag: words are split up from phrases to then be categorized based on type
   3. Lemmatize: convert words into their base form
   4. Create bag of words
