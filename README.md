@@ -24,7 +24,6 @@ import nltk
 nltk.download(“punkt”)
 nltk.download(“averaged_perceptron_tagger”)
 python clean_master_data.py
-
 ```
 4. Run the main file
 ```
