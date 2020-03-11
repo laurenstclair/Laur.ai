@@ -25,4 +25,6 @@ pip install -r requirements.txt
 python laur.ai.py
 ```
 ## Class Structure
-All files are named according to python naming conventions. 
+All files are named according to python naming conventions, all lower case with underscores signifying new words. Our classes are organized using the following structure.
+
+
