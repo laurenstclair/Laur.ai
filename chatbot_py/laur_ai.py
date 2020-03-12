@@ -11,35 +11,31 @@ from sklearn.metrics import pairwise_distances
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 
+from clean_master_data import DataCleaner
+
 class LaurAI:
     """
-        Class for the LaurAI chatbot.
+    A chatbot that reads in data and given context will produce a response 
+    based on the trained data
     """
 
     def __init__(self, data, use_cleaned_data=True):
         self.data = data[["comment", "response"]]
+        self.data_cleaner = DataCleaner()
         self.cleaned_data = DataFrame(columns=["Question", "Answer"])
         # use data if provided
         if use_cleaned_data:
             self.cleaned_data = read_pickle("data/master_data_cleaned.pkl")
             if len(self.cleaned_data) != len(self.data):
+                # if the data does not match, retrain
                 print("New data found. Please wait as this data is processed")
-                self.clean_data()
+                self.cleaned_data = self.data_cleaner.clean_data(self.data)
+                # to improve speed, save to master cleaned
+                self.cleaned_data.to_pickle("data/master_data_cleaned.pkl")
 
         self.finalText = DataFrame(columns=["Lemmas"])
         self.c = CountVectorizer()
         self.bag = None
-
-    def clean_data(self):
-        # For all lines in the data dataframe
-        for j in self.data.iterrows():
-            # Appends the cleaned question and response to the cleaned_data array
-            self.cleaned_data = self.cleaned_data.append(
-                {
-                    "Question":self.tokenize_and_tag_line(self.clean_line(j[1][0])),
-                    "Answer":self.tokenize_and_tag_line(self.clean_line(j[1][1]))
-                },
-                ignore_index=True)
 
     def clean_line(self, line):
         # This line makes all lowercase, and removes anything that isn't a number
@@ -122,6 +118,7 @@ class LaurAI:
         # determine index of element with highest similarity
         # the answer is the response at this inde
         return cosine.idxmax()
+
 
 print("Please wait as Laur.AI loads")
 

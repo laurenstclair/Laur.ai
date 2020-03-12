@@ -1,5 +1,5 @@
 from pandas import read_csv
-from chatbot_py.clean_master_data import clean_data
+from clean_master_data import DataCleaner
 
 print("Downloading laur.ai")
 
@@ -13,5 +13,6 @@ nltk.download("stopwords")
 print("Training Laur.AI")
 # prepare the data
 df = read_csv("data/master_data.csv")
-cleaned_data = clean_data(df)
+data_cleaner = DataCleaner()
+cleaned_data = data_cleaner.clean_data(df)
 cleaned_data.to_pickle("data/master_data_cleaned.pkl")
