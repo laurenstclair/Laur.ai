@@ -123,7 +123,7 @@ class LaurAI:
                 # if laur.ai recognizes the word, it will on it
                 # otherwise, do not
                 valid_sentence.loc[:, i] = 1
-
+            
         # find cosine similarity
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
         # prepare data to be used in series with data's index
