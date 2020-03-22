@@ -38,15 +38,18 @@ class LaurAI:
         self.bag = None
 
     def clean_line(self, line):
-        # This line makes all lowercase, and removes anything that isn't a number
+        ''' 
+        Clean the line
+        This line makes all lowercase, and removes anything that isn't a number
+        '''
         return sub(r'[^a-z ]', '', str(line).lower())
 
     def tokenize_and_tag_line(self, line):
-        # Tokenizes the words then tags the tokenized words
+        ''' Tokenizes the words then tags the tokenized words '''
         return pos_tag(word_tokenize(line), None)
 
     def create_lemma_line(self, input_line):
-        # We create the lemmatizer object
+        ''' We create the lemmatizer object '''
         lemma = wordnet.WordNetLemmatizer()
         # This is an array for the current line that we will append values to
         line = []
@@ -58,17 +61,29 @@ class LaurAI:
         return {"Lemmas": " ".join(line)}
 
     def create_lemma(self):
-        # Creates lemmas for the cleaned data (lemma is the lower )
+        ''' Creates lemmas for the cleaned data (lemma is the lower )'''
         lemmas = []
         for j in self.cleaned_data.iterrows():
             lemmas.append(self.create_lemma_line(j[1][0]))
         self.finalText = self.finalText.append(lemmas)
 
     def create_bag_of_words(self):
+        '''
+        create a bag of words and save in a dataframe with the same indicies as
+        the master data
+        '''
         self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(),
                              columns=self.c.get_feature_names(), index=self.data.index)
 
     def askQuestion(self, question):
+        '''
+        @param question: a string context given by the user
+        output a string response to context
+        ---
+        Compute most similar context to the input using semisupervised learning
+        and return approproate response to the determined most similar context
+        '''
+        
         # Removes all "stop words"
         valid_words = []
         for i in question.split():
@@ -103,14 +118,11 @@ class LaurAI:
 
         # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
-            if (valid_sentence.loc[0, i] != 0):
-                # if we have not seen the lemma before, columns will be added
-                # this will create an exception in the cosine similarity calcualtion
-                # therefore if we see this, provide a generic response and exit
-                raise KeyError("Unknown word passed in as data")
-
-            # if input in data, put i
-            valid_sentence.loc[:, i] = 1
+            if i in valid_sentence.columns:
+                # if the column exists, laur.ai recognizes the word
+                # if laur.ai recognizes the word, it will on it
+                # otherwise, do not
+                valid_sentence.loc[:, i] = 1
 
         # find cosine similarity
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
@@ -118,7 +130,10 @@ class LaurAI:
         cosine = Series(cosine.reshape(1,-1)[0], index=self.data.index)
 
         # determine index of element with highest similarity
-        # the answer is the response at this inde
+        # the answer is the response at this index
+        # if it does not find any datapoints similar then it recognizes nothing
+        # in the input and the index returned is 0
+
         return cosine.idxmax()
 
 
