@@ -61,7 +61,7 @@ class LaurAI:
         # Creates lemmas for the cleaned data (lemma is the lower )
         lemmas = []
         for j in self.cleaned_data.iterrows():
-            lemmas.append(self.create_lemma_line(j[1][1]))
+            lemmas.append(self.create_lemma_line(j[1][0]))
         self.finalText = self.finalText.append(lemmas)
 
     def create_bag_of_words(self):
@@ -81,6 +81,8 @@ class LaurAI:
 
         try:
             index = self.determine_most_similar_context(lemma_line)
+            print(index)
+            print(self.data.loc[index, "comment"])
 
             # respond with response to most similar context
             answer = self.data.loc[index, "response"]
@@ -101,7 +103,7 @@ class LaurAI:
 
         # set column of 1's for words in lemma line
         for i in lemma_line["Lemmas"].split(' '):
-            if (valid_sentence.loc[:, i] != 0).any():
+            if (valid_sentence.loc[0, i] != 0):
                 # if we have not seen the lemma before, columns will be added
                 # this will create an exception in the cosine similarity calcualtion
                 # therefore if we see this, provide a generic response and exit
