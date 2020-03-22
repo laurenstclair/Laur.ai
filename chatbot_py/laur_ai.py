@@ -81,8 +81,8 @@ class LaurAI:
 
         try:
             index = self.determine_most_similar_context(lemma_line)
-            print(index)
-            print(self.data.loc[index, "comment"])
+            # print(index)
+            # print(self.data.loc[index, "comment"])
 
             # respond with response to most similar context
             answer = self.data.loc[index, "response"]
