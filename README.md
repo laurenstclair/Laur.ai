@@ -18,6 +18,8 @@ source venv/bin/activate
 ```
 3. Install all dependencies
 ```
+pip install -r requiremnts.txt
+python -m spacy download en
 python chatbot_py/prepare_laurAI.py
 ```
 4. Run the main file
