@@ -13,6 +13,14 @@ from nltk.corpus import stopwords
 
 from clean_master_data import DataCleaner
 
+# This is for the autocorrect functionality
+from textblob import TextBlob 
+
+# This is for the Named Entity Recognition functionality
+import spacy
+import en_core_web_sm
+from random import randint
+
 class LaurAI:
     """
     A chatbot that reads in data and given context will produce a response 
@@ -31,7 +39,7 @@ class LaurAI:
                 print("New data found. Please wait as this data is processed")
                 self.cleaned_data = self.data_cleaner.clean_data(self.data)
                 # to improve speed, save to master cleaned
-                self.cleaned_data.to_pickle("data/master_data_cleaned.pkl")
+                self.cleaned_data.to_pickle("data/master_data_cleaned.pkl", protocol=4)
 
         self.finalText = DataFrame(columns=["Lemmas"])
         self.c = CountVectorizer()
@@ -96,15 +104,44 @@ class LaurAI:
 
         try:
             index = self.determine_most_similar_context(lemma_line)
-            # print(index)
-            # print(self.data.loc[index, "comment"])
+            if index != -1:
+                # respond with response to most similar context
+                answer = self.data.loc[index, "response"]
+                return answer
+            
+            # Else we are going to respond with one of the nouns with the following question
+            nlp = en_core_web_sm.load()
+            nouns = nlp(question)
+            # Get a random noun from the generated list of nouns, and select the first element
+            # which is the noun (second is what kind of noun)
+            noun = nouns[randint(0, len(nouns)-1)]
 
-            # respond with response to most similar context
-            answer = self.data.loc[index, "response"]
-            return answer
+            return "Sorry :,( I don't know what " + str(noun) + " is!"
+
+
         except KeyError:
             # an unknown word was passed
             return "I am miss pwesident uwu"
+
+    def autocorrect(self, input):
+        # Creates the NLP named entity recognition
+        nlp = en_core_web_sm.load()
+        # Finds all of the nouns in the input string
+        nouns = nlp(input)
+
+        finalText = ""
+        # For all of the values in the input
+        for i in input.split(" "):
+            # If the values are not nouns (autocorrect breaks on nouns)
+            if i not in str(nouns):
+                # Run autocorrect on the nouns and add it to the final string
+                finalText += str(TextBlob(i).correct()) + " "
+            # Else just add the noun
+            else:
+                finalText += i + " "
+        
+        print(finalText)
+        return finalText
 
     def determine_most_similar_context(self, lemma_line):
         '''
@@ -123,11 +160,6 @@ class LaurAI:
                 # if laur.ai recognizes the word, it will on it
                 # otherwise, do not
                 valid_sentence.loc[:, i] = 1
-<<<<<<< HEAD
-            
-=======
-
->>>>>>> master
         # find cosine similarity
         cosine = 1 - pairwise_distances(self.bag, valid_sentence, metric="cosine")
         # prepare data to be used in series with data's index
@@ -138,7 +170,16 @@ class LaurAI:
         # if it does not find any datapoints similar then it recognizes nothing
         # in the input and the index returned is 0
 
-        return cosine.idxmax()
+        # We can solve the 0 problem by simply saying that if the cosine.max() is 
+        # less than 0.10 similarity we are going to respond with a predefined message 
+        # with one of the names in the inputted question.
+
+        print(cosine.max())
+        if cosine.max() > 0.01:
+            return cosine.idxmax()
+        
+        return -1
+
 
 
 print("Please wait as Laur.AI loads")
@@ -167,5 +208,5 @@ while(True):
         print("bye :))")
         break
     else:
-        response = laurBot.askQuestion(context)
+        response = laurBot.askQuestion(laurBot.autocorrect(context.lower()))
         print(response)
