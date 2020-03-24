@@ -140,7 +140,7 @@ class LaurAI:
             else:
                 finalText += i + " "
         
-        print(finalText)
+        # print(finalText)
         return finalText
 
     def determine_most_similar_context(self, lemma_line):
@@ -174,7 +174,7 @@ class LaurAI:
         # less than 0.10 similarity we are going to respond with a predefined message 
         # with one of the names in the inputted question.
 
-        print(cosine.max())
+        # print(cosine.max())
         if cosine.max() > 0.01:
             return cosine.idxmax()
         

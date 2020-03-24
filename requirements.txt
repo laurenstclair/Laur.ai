@@ -4,4 +4,3 @@ numpy
 sklearn
 textblob
 spacy
-python -m spacy download en
