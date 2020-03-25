@@ -168,17 +168,22 @@ class LaurAI:
         # determine index of element with highest similarity
         # the answer is the response at this index
         # if it does not find any datapoints similar then it recognizes nothing
-        # in the input and the index returned is 0
+        # in the input and the index returned is -1
 
         # We can solve the 0 problem by simply saying that if the cosine.max() is 
-        # less than 0.10 similarity we are going to respond with a predefined message 
-        # with one of the names in the inputted question.
+        # less than 0.01 similarity we are going to respond with a predefined message 
 
-        # print(cosine.max())
-        if cosine.max() > 0.01:
-            return cosine.idxmax()
+        if cosine.max() < 0.01:
+            return -1
         
-        return -1
+        # return cosine.idxmax()
+        # if multiple indicies share the maximum value, pick a random
+        # create list of indicies of all maximum values
+        max_index = cosine[cosine.values == cosine.max()].index
+        # return a random index from the list
+        i = randint(0,len(max_index)-1)
+        return max_index[i]
+
 
 
 
