@@ -83,7 +83,7 @@ class LaurAI:
         self.bag = DataFrame(self.c.fit_transform(self.finalText["Lemmas"]).toarray(),
                              columns=self.c.get_feature_names(), index=self.data.index)
 
-    def askQuestion(self, question):
+    def askQuestion(self, context):
         '''
         @param question: a string context given by the user
         output a string response to context
@@ -91,10 +91,12 @@ class LaurAI:
         Compute most similar context to the input using semisupervised learning
         and return approproate response to the determined most similar context
         '''
+        # correct the given input
+        context = self.autocorrect(context)
         
         # Removes all "stop words"
         valid_words = []
-        for i in question.split():
+        for i in context.split():
             if i not in stopwords.words("english"):
                 valid_words.append(i)
 
@@ -109,9 +111,9 @@ class LaurAI:
                 answer = self.data.loc[index, "response"]
                 return answer
             
-            # Else we are going to respond with one of the nouns with the following question
+            # Else we are going to respond with one of the nouns with the following context
             nlp = en_core_web_sm.load()
-            nouns = nlp(question)
+            nouns = nlp(context)
             # Get a random noun from the generated list of nouns, and select the first element
             # which is the noun (second is what kind of noun)
             noun = nouns[randint(0, len(nouns)-1)]
@@ -143,7 +145,7 @@ class LaurAI:
         # print(finalText)
         return finalText
 
-    def determine_most_similar_context(self, lemma_line):
+    def determine_most_similar_context(self, lemma_line, similarity_threshold=0.05):
         '''
         @param lemma_line: a dictionary of words from the input
         ----
@@ -173,7 +175,7 @@ class LaurAI:
         # We can solve the 0 problem by simply saying that if the cosine.max() is 
         # less than 0.01 similarity we are going to respond with a predefined message 
 
-        if cosine.max() < 0.01:
+        if cosine.max() < similarity_threshold:
             return -1
         
         # return cosine.idxmax()
@@ -213,5 +215,5 @@ while(True):
         print("bye :))")
         break
     else:
-        response = laurBot.askQuestion(laurBot.autocorrect(context.lower()))
+        response = laurBot.askQuestion(context.lower())
         print(response)

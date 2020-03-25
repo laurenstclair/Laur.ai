@@ -35,3 +35,17 @@ laur_ai.py is built using the nltk library. The data is run throw a series of st
   2. Tokenize and tag words: words are split up from phrases to then be categorized based on the type
   3. Lemmatize words: convert words into their base form
   4. Create a bag of words
+
+
+## Features
+
+### Simple Chatbot
+laur_ai uses a mix of natural language processing and semi-supervised learning to produce responses to a given context from the data that it has been trained on. In this way, our chatbot can respond to a wide variety of topics, but is limited by the quality of data that it is trained on.
+If multiple contexts in the training data have the same maximum similarity, the model will randomly select a response to one.
+
+### Autocorrect
+laur_ai uses an autocorrect function that will guess the most similar word to a misspelling. The autocorrect feature recognizes nouns via Named Entity Recognition and does not attempt to correct any proper noun.
+
+### Response to Unrecognized words
+If the maximum similarity found is below a threshold (defeault is 0.05) then the bot will select a noun in the given context and say that it does not know what it means.
+
