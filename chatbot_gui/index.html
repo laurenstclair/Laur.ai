@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Laur.ai</title>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet prefetch' href='./bot_resource/bot_style.css'>
+    <link rel='stylesheet prefetch' href='https://codepen.io/assets/reset/normalize.css'>
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css'>
+    <script type="text/javascript" src="./bot_resource/bot_act.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script src="./renderer.js"></script>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+  </head>
+
+  <body>
+   
+    <h5 class="welcome-msg">Welcome to Laur.ai. We are using Node.js <span id="node-version"></span>,
+      Chromium <span id="chrome-version"></span>,
+      and Electron <span id="electron-version"></span>.</h5>
+
+  </body>
+
+  <div class="wrapper">
+    <nav id="nav" class="nav">
+      <div class="default-dav">
+        <div class="main-nav">
+          <div class="toggle"></div>
+          <div class="main-nav-item">Laur.ai</div>
+        </div>
+      </div>
+    </nav>
+    <div id="inner" class="inner">
+      <div id="content" class="content"></div>
+  </div>
+  <div id="bottom" class="bottom">
+      <textarea id="input" class="input"></textarea>
+      <div id="send" class="send"></div>
+  </div>
+  </div>
+
+</html>

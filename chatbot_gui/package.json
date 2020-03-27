@@ -1,0 +1,23 @@
+{
+  "name": "electron-chatbot",
+  "version": "1.0.0",
+  "description": "COSC 310 chatbot GUI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/Nathan-Nesbitt/Laur.ai",
+  "keywords": [
+    "Electron",
+    "chatbot"
+  ],
+  "author": "COSC 310 Project",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^8.1.1"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsonfile": "^2.4.0"
+  }
+}
