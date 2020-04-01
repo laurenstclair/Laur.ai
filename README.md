@@ -48,4 +48,3 @@ laur_ai uses an autocorrect function that will guess the most similar word to a 
 
 ### Response to Unrecognized words
 If the maximum similarity found is below a threshold (defeault is 0.05) then the bot will select a noun in the given context and say that it does not know what it means.
-
